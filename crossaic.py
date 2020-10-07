@@ -44,7 +44,7 @@ class Aic:
         temp.columns=["temp1","temp2"]
         group=temp.groupby("temp2")
         group.min()["temp1"].values.tolist()
-        names=[str(i)+"<=" for i in group.min()["temp1"].values.tolist()]
+        names=["%02d"%j+":"+str(i)+"<=" for j,i in enumerate(group.min()["temp1"].values.tolist())]
         temp2 = pd.cut(self._order(var).iloc[:,1],self._cutpoint(var),labels=names)
         #temp2 = temp2.astype('O')
         return (temp2.cat.add_categories("99:missing").fillna("99:missing").astype('O'))
@@ -56,6 +56,9 @@ class Aic:
         for col in ncols:
             #from IPython.core.debugger import Pdb; Pdb().set_trace()
             x[col] = self._category(x[col])
+            x[col] = x[col].fillna('99:missing')
+        for col in ccols:
+            x[col] = x[col].fillna('99:missing')
         
         return (x)
     
@@ -80,7 +83,7 @@ class Aic:
         aic0=-2*MLLd+2*((len1-1)*leny-1)
                 #独立
         MLPi=crossed1.iloc[len1-1,:].sum()+crossed1.iloc[:,len2-1].sum()-4*crossed1.iloc[len1-1,len2-1]
-        aic1=-2*MLPi+2*(len1-1+leny-1)
+        aic1=-2*MLPi+2*(len1-2+leny-1)
         return (crossed.index.name + ':{:.5f}'.format(aic0-aic1),crossed)
         
     def fit(self):     
